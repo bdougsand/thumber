@@ -33,6 +33,7 @@ function escapeURL(url) {
 var FORMATS = {
     png: {ext: "png", contentType: ""}
 },
+    IMG_URL = system.env["THUMBER_IMG_URL"] || "/thumb",
     IMG_DIR = system.env["THUMBER_IMG_DIR"] ||
         fs.workingDirectory + fs.separator + "thumb",
     PORT = system.env["PHANTOM_PORT"];
@@ -83,8 +84,16 @@ var server = webserver.create(),
                     page.render(filepath);
                     page.close();
 
-                    response.statusCode = 200;
-                    response.write(filepath);
+                    if (query.redirect) {
+                        var redir_url = [IMG_URL, dir, filename].join(sep);
+                        response.setHeader("Location", redir_url);
+                        response.statusCode = 302;
+                        response.write("");
+                    } else {
+                        response.statusCode = 200;
+                        response.write(filepath);
+                    }
+
                     response.close();
                 }, 5000);
             } else {

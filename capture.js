@@ -70,6 +70,7 @@ var server = webserver.create(),
             page = webpage.create();
 
         page.viewportSize = { width: 1280, height: 800 };
+        page.clipRect = { top: 0, left: 0, width: 1280, height: 800 };
 
         page.open(fetchURL, function(status) {
             if (status === "success") {

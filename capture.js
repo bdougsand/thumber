@@ -36,9 +36,13 @@ var FORMATS = {
     IMG_URL = system.env["THUMBER_IMG_URL"] || "/thumb",
     IMG_DIR = system.env["THUMBER_IMG_DIR"] ||
         fs.workingDirectory + fs.separator + "thumb",
+    TIMEOUT_DEFAULT = parseInt(system.env["THUMBER_TIMEOUT"]),
     PORT = system.env["PHANTOM_PORT"];
 
 PORT = PORT ? parseInt(PORT) : 8080;
+
+if (isNaN(TIMEOUT_DEFAULT))
+    TIMEOUT_DEFAULT = 5000;
 
 
 var server = webserver.create(),
@@ -47,7 +51,8 @@ var server = webserver.create(),
             urlParts = url.split("?"),
             query = parseQuery(urlParts[1]),
             fetchURL = query.url,
-            format = query.format;
+            format = query.format,
+            timeout = parseInt(query.timeout);
 
         if (!query.url) {
             response.statusCode = 401;
@@ -57,6 +62,9 @@ var server = webserver.create(),
 
         if (!format)
             format = "png";
+
+        if (!timeout || isNaN(timeout) || timeout < 0)
+            timeout = TIMEOUT_DEFAULT;
 
         var ext = FORMATS[format].ext,
             page = webpage.create();
@@ -95,7 +103,7 @@ var server = webserver.create(),
                     }
 
                     response.close();
-                }, 5000);
+                }, timeout);
             } else {
                 response.statusCode = 500;
                 response.write("status:" + status);
